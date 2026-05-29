@@ -3,9 +3,9 @@
     "zabbix-soc-filter@simovicc.com": {
       "updates": [
         {
-          "version": "4.4.1",
-          "update_link": "https://github.com/simovicc/zsf-config/raw/main/releases/zabbix-soc-filter-4.4.1.xpi",
-          "update_hash": "sha256:6e506193c8b8e1655ddad2b13db4a12162cf68e47be7ba5cbf7fedc1663100a1",
+          "version": "4.4.2",
+          "update_link": "https://github.com/simovicc/zsf-config/raw/main/releases/zabbix-soc-filter-4.4.2.xpi",
+          "update_hash": "sha256:a04e86f6027ae96bac3e637cea890736d4b4c74d1faff6e968ae2ddf5a6c59aa",
           "applications": {
             "gecko": {
               "strict_min_version": "115.0"
