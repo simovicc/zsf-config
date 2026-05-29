@@ -1,0 +1,24 @@
+{
+  "addons": {
+    "zabbix-soc-filter@simovicc.com": {
+      "updates": [
+        {
+          "version": "4.3.0",
+          "update_link": "https://github.com/simovicc/zsf-config/raw/main/releases/zabbix-soc-filter-4.3.0.xpi"
+        },
+        {
+          "version": "4.2.2",
+          "update_link": "https://github.com/simovicc/zsf-config/raw/main/releases/zabbix-soc-filter-4.2.2.xpi"
+        },
+        {
+          "version": "4.2.1",
+          "update_link": "https://github.com/simovicc/zsf-config/raw/main/releases/zabbix-soc-filter-4.2.1.xpi"
+        },
+        {
+          "version": "4.1.0",
+          "update_link": "https://github.com/simovicc/zsf-config/raw/main/releases/zabbix-soc-filter-4.1.0.xpi"
+        }
+      ]
+    }
+  }
+}
