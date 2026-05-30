@@ -15,14 +15,14 @@
 
 ## Šta radi
 
-- **Filtriranje alarma** — prikazuje samo alarme koje treba javiti klijentu, ostale stišava (blacklist / whitelist po internim pravilima).
-- **Obavesti klijenta** — jedan klik otvara unapred formatiran mejl za odgovarajući tim (DCCPT, Networking, DevOps, DonDon), kopira sadržaj i šalje acknowledge u Zabbix.
-- **Grupno obaveštavanje** — više alarma istog tima odjednom.
-- **Označi pregledano** — acknowledge alarma koji se ne javljaju, sa komentarom „Seen by".
-- **Evidencija prijavljenih alarma** — automatski vodi spisak alarma i priprema izvoz za SharePoint Registar (samo CT tenant).
-- **Podsetnik na poziv** — van radnog vremena prikazuje primarnog i sekundarnog dežurnog sa brojem telefona.
-- **Badge lokacije** — „Rad iz kancelarije" ili „Rad od kuće" po javnoj IP adresi.
-- **Auto-update** — Waterfox/Firefox sami povlače nove verzije; Chrome uz ručni korak.
+- **Filtriranje alarma** - prikazuje samo alarme koje treba javiti klijentu, ostale stišava (blacklist / whitelist po internim pravilima).
+- **Obavesti klijenta** - jedan klik otvara unapred formatiran mejl za odgovarajući tim (DCCPT, Networking, DevOps, DonDon), kopira sadržaj i šalje acknowledge u Zabbix.
+- **Grupno obaveštavanje** - više alarma istog tima odjednom.
+- **Označi pregledano** - acknowledge alarma koji se ne javljaju, sa komentarom „Seen by".
+- **Evidencija prijavljenih alarma** - automatski vodi spisak alarma i priprema izvoz za SharePoint Registar (samo CT tenant).
+- **Podsetnik na poziv** - van radnog vremena prikazuje primarnog i sekundarnog dežurnog sa brojem telefona.
+- **Badge lokacije** - „Rad iz kancelarije" ili „Rad od kuće" po javnoj IP adresi.
+- **Auto-update** - Waterfox/Firefox sami povlače nove verzije; Chrome uz ručni korak.
 
 ## Kako izgleda
 
@@ -30,7 +30,7 @@ Popup sa podešavanjima:
 
 <p align="center"><img src="docs/popup.svg" alt="Popup" width="340"></p>
 
-Na Zabbix Problems strani — crveni alarmi za javljanje i zeleni već obavešteni:
+Na Zabbix Problems strani - crveni alarmi za javljanje i zeleni već obavešteni:
 
 <p align="center"><img src="docs/zabbix-row.svg" alt="Zabbix redovi" width="720"></p>
 
