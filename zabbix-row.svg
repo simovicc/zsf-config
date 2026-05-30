@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 230" width="760" height="230" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="760" height="230" rx="12" fill="#15171b"/>
+  <text x="20" y="34" font-size="13" font-weight="700" fill="#868b93">ZABBIX  ·  PROBLEMS  (sa ukljucenim Fokus mode)</text>
+  <!-- header -->
+  <g font-size="11" font-weight="700" fill="#868b93">
+    <text x="20" y="64">VREME</text>
+    <text x="110" y="64">HOST</text>
+    <text x="300" y="64">PROBLEM</text>
+  </g>
+  <line x1="16" y1="74" x2="744" y2="74" stroke="#2a2e34"/>
+  <!-- red row to notify -->
+  <g transform="translate(0,84)">
+    <rect x="8" y="0" width="744" height="56" rx="8" fill="rgba(226,59,59,0.10)" stroke="rgba(226,59,59,0.35)"/>
+    <text x="20" y="33" font-size="13" fill="#e9eaec">14:21</text>
+    <text x="110" y="33" font-size="13" fill="#e9eaec">srv-app-01</text>
+    <text x="300" y="33" font-size="13" fill="#e9eaec">Veeam: Failed Job</text>
+    <rect x="486" y="14" width="138" height="28" rx="7" fill="#E23B3B"/>
+    <text x="555" y="33" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">Obavesti klijenta</text>
+    <rect x="632" y="14" width="104" height="28" rx="7" fill="#23262c" stroke="#3a3f47"/>
+    <text x="684" y="33" font-size="12" font-weight="600" fill="#c9cdd4" text-anchor="middle">+ evidencija</text>
+  </g>
+  <!-- green notified row -->
+  <g transform="translate(0,150)">
+    <rect x="8" y="0" width="744" height="56" rx="8" fill="rgba(109,217,154,0.10)" stroke="rgba(109,217,154,0.35)"/>
+    <text x="20" y="33" font-size="13" fill="#e9eaec">14:08</text>
+    <text x="110" y="33" font-size="13" fill="#e9eaec">net-core-02</text>
+    <text x="300" y="33" font-size="13" fill="#e9eaec">Interface down</text>
+    <rect x="486" y="14" width="138" height="28" rx="7" fill="rgba(109,217,154,0.18)" stroke="#6dd99a"/>
+    <text x="555" y="33" font-size="12" font-weight="700" fill="#6dd99a" text-anchor="middle">Klijent obavesten</text>
+  </g>
+</svg>
