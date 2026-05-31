@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <b>Waterfox · Firefox · Chrome / Edge / Brave</b> &nbsp;·&nbsp; Manifest V3 &nbsp;·&nbsp; verzija 4.8.0
+  <b>Waterfox · Firefox · Chrome / Edge / Brave</b> &nbsp;·&nbsp; Manifest V3 &nbsp;·&nbsp; verzija 5.2.1
 </p>
 
 ---
