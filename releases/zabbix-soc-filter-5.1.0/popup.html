@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <title>Zabbix SOC Filter</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #131417;
+      --surface: #1a1c20;
+      --surface-2: #212429;
+      --surface-hover: #272a30;
+      --border: rgba(255, 255, 255, 0.07);
+      --border-strong: rgba(255, 255, 255, 0.12);
+      --text: #f0f1f3;
+      --text-dim: #b4b8bf;
+      --text-faint: #868b93;
+      --accent: #E23B3B;
+      --accent-hover: #ff5a5a;
+      --accent-soft: rgba(226, 59, 59, 0.13);
+      --success: #6fae84;
+      --danger: #cf7066;
+    }
+
+    body {
+      width: 268px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      font-size: 13px;
+      background: var(--bg);
+      color: var(--text);
+      padding: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .header-logo {
+      width: 28px;
+      height: 28px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-strong);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    .header-titles { display: flex; flex-direction: column; gap: 1px; }
+
+    h1 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      color: var(--text);
+    }
+
+    .header-sub {
+      font-size: 9px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    .status {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px 13px;
+      margin-bottom: 11px;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 0;
+      font-size: 12px;
+    }
+
+    .status-row + .status-row { border-top: 1px solid var(--border); }
+
+    .status-label { color: var(--text-dim); }
+
+    .status-value {
+      font-weight: 600;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-value::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-faint);
+    }
+    #visible.status-value::before,
+    #count.status-value::before { display: none; }
+
+    .status-value.on { color: var(--success); }
+    .status-value.on::before { background: var(--success); box-shadow: 0 0 6px rgba(111, 174, 132, 0.5); }
+    .status-value.off { color: var(--text-dim); }
+    .status-value.off::before { background: var(--text-faint); }
+
+    #visible { color: var(--accent); }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 9px;
+      overflow: hidden;
+    }
+
+    .toggle-zone {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 13px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .toggle-zone:hover { background: var(--surface-hover); }
+
+    .toggle-zone.is-disabled { opacity: 0.45; cursor: not-allowed; }
+    .toggle-zone.is-disabled:hover { background: transparent; }
+
+    .toggle-text { flex: 1; min-width: 0; pointer-events: none; }
+
+    .toggle-label {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .toggle-state {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 2px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    .toggle-zone.is-on .toggle-state { color: var(--accent-hover); font-weight: 600; }
+
+    .toggle {
+      position: relative;
+      width: 38px;
+      height: 21px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-strong);
+      border-radius: 21px;
+      transition: background 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+      pointer-events: none;
+    }
+
+    .toggle::before {
+      content: "";
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      left: 2px;
+      top: 2px;
+      background: #c4c7cc;
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .toggle-zone.is-on .toggle {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .toggle-zone.is-on .toggle::before {
+      transform: translateX(17px);
+      background: #fff;
+    }
+
+    .panel-body { padding: 0 13px 12px 13px; }
+
+    .controls-row { display: flex; align-items: center; gap: 11px; }
+
+    .volume-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 3px;
+      background: var(--surface-2);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 13px;
+      height: 13px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid var(--bg);
+    }
+
+    .volume-slider::-moz-range-thumb {
+      width: 13px;
+      height: 13px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid var(--bg);
+    }
+
+    .volume-slider:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .volume-value {
+      font-size: 10px;
+      color: var(--text-dim);
+      min-width: 30px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .perm-warn {
+      padding: 9px 10px;
+      background: rgba(207, 112, 102, 0.1);
+      border: 1px solid rgba(207, 112, 102, 0.3);
+      border-radius: 7px;
+      font-size: 10.5px;
+      color: #e89b92;
+      line-height: 1.5;
+      margin: 0 13px 12px 13px;
+      text-align: center;
+    }
+
+    .perm-warn.hidden { display: none; }
+
+    .perm-warn-btn {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 14px;
+      background: var(--danger);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .perm-warn-btn:hover { opacity: 0.9; }
+
+    .update-check-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 13px 10px 13px;
+    }
+    .ghost-btn {
+      padding: 6px 12px;
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .ghost-btn:disabled { opacity: 0.5; cursor: default; }
+    .update-check-status {
+      font-size: 10px;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+    .update-check-status.ok { color: #2f9e54; }
+    .update-check-status.new { color: var(--accent); }
+
+    .link-btn {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      font-family: inherit;
+      text-align: left;
+      margin-bottom: 11px;
+    }
+
+    .link-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .link-btn-icon {
+      width: 26px;
+      height: 26px;
+      background: var(--accent-soft);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 12px;
+      flex-shrink: 0;
+      margin-right: 10px;
+    }
+
+    .link-btn-text { flex: 1; min-width: 0; display: block; }
+
+    .link-btn-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+
+    .link-btn-sub {
+      font-size: 8px;
+      color: var(--text-faint);
+      margin-top: 2px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: block;
+    }
+
+    .link-btn-arrow {
+      color: var(--text-faint);
+      font-size: 13px;
+      flex-shrink: 0;
+      margin-left: 6px;
+    }
+
+    .shortcut-hint {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      text-align: center;
+      padding: 2px 0;
+    }
+
+    .shortcut {
+      display: inline-block;
+      padding: 2px 7px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      color: var(--text);
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .name-zone { padding: 11px 13px; }
+    .name-label { font-size: 12.5px; font-weight: 500; color: var(--text); }
+    .name-hint { font-size: 9px; color: var(--text-faint); font-weight: 400; letter-spacing: 0.3px; }
+    .name-input {
+      width: 100%;
+      margin-top: 9px;
+      padding: 8px 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-strong);
+      border-radius: 7px;
+      color: var(--text);
+      font-size: 12.5px;
+      font-family: inherit;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .name-input:focus { border-color: var(--accent); }
+    .name-input::placeholder { color: var(--text-faint); }
+
+    .footer {
+      margin-top: 13px;
+      padding-top: 11px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 9px;
+      letter-spacing: 0.3px;
+      color: var(--text-faint);
+    }
+
+    .hidden { display: none !important; }
+
+    .location-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      margin: 10px 0 4px;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-dim);
+    }
+    .location-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--text-faint);
+      flex-shrink: 0;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.04);
+    }
+    .location-badge--office { color: #ff7a7a; border-color: rgba(226, 59, 59, 0.35); }
+    .location-badge--office .location-dot { background: #E23B3B; box-shadow: 0 0 0 2px rgba(226, 59, 59, 0.2); }
+    .location-badge--vpn { color: #f1aa3b; border-color: rgba(241, 170, 59, 0.3); }
+    .location-badge--vpn .location-dot { background: #f1aa3b; box-shadow: 0 0 0 2px rgba(241, 170, 59, 0.18); }
+    .location-badge--home { color: #6dd99a; border-color: rgba(47, 158, 84, 0.3); }
+    .location-badge--home .location-dot { background: #2f9e54; box-shadow: 0 0 0 2px rgba(47, 158, 84, 0.18); }
+
+    .auth-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 16px 14px 14px;
+      margin: 14px 0 10px;
+    }
+    .auth-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .auth-desc { font-size: 11px; color: var(--text-dim); margin-bottom: 12px; line-height: 1.5; }
+    .auth-input {
+      width: 100%;
+      padding: 9px 11px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 12px;
+      font-family: inherit;
+      box-sizing: border-box;
+      margin-bottom: 8px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .auth-input:focus { border-color: var(--accent); }
+    .auth-input::placeholder { color: var(--text-faint); }
+    .auth-btn {
+      width: 100%;
+      padding: 10px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: background 0.15s;
+    }
+    .auth-btn:hover { background: var(--accent-hover); }
+    .auth-btn:disabled { background: var(--surface-hover); color: var(--text-faint); cursor: not-allowed; }
+    .auth-btn--ghost { background: transparent; color: var(--text); border: 1px solid var(--border-strong); }
+    .auth-btn--ghost:hover { background: var(--surface-hover); }
+    .auth-error {
+      margin-top: 10px;
+      padding: 8px 10px;
+      background: rgba(226, 59, 59, 0.1);
+      border: 1px solid rgba(226, 59, 59, 0.3);
+      border-radius: 5px;
+      color: #ff7a7a;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .contact-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 12px;
+      margin-bottom: 12px;
+    }
+    .contact-title {
+      font-size: 10px; font-weight: 600; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px;
+    }
+    .contact-row { display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 11px; }
+    .contact-key { color: var(--text-faint); min-width: 56px; }
+    .contact-val { color: var(--text); text-decoration: none; }
+    a.contact-val:hover { color: var(--accent); }
+
+    .locked-card {
+      background: rgba(226, 59, 59, 0.08);
+      border: 1px solid rgba(226, 59, 59, 0.3);
+      border-radius: 10px;
+      padding: 14px;
+      margin: 14px 0 10px;
+      text-align: center;
+    }
+    .locked-icon { font-size: 26px; color: var(--accent); margin-bottom: 6px; line-height: 1; }
+    .locked-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .locked-reason { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+    .locked-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .locked-actions .auth-btn { flex: 1; }
+
+    .update-banner {
+      background: rgba(47, 158, 84, 0.1);
+      border: 1px solid rgba(47, 158, 84, 0.3);
+      border-radius: 6px;
+      padding: 9px 11px;
+      margin: 12px 0;
+      font-size: 11px;
+      color: #6dd99a;
+      line-height: 1.45;
+    }
+    .update-banner-title { font-weight: 600; margin-bottom: 3px; }
+    .update-banner a { color: #fff; text-decoration: underline; cursor: pointer; font-weight: 600; }
+    .update-banner a:hover { color: #d8ffe6; }
+
+    .auth-footer {
+      text-align: center;
+      font-size: 10px;
+      color: var(--text-faint);
+      padding: 10px 0 0;
+      border-top: 1px solid var(--border);
+      margin-top: 12px;
+    }
+    .auth-footer a { color: var(--text-dim); text-decoration: none; cursor: pointer; }
+    .auth-footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-logo">Z</div>
+    <div class="header-titles">
+      <h1>Zabbix SOC Filter</h1>
+      <span class="header-sub">Security Operations</span>
+    </div>
+  </div>
+
+  <div class="location-badge hidden" id="location-badge">
+    <span class="location-dot"></span>
+    <span class="location-text" id="location-text">-</span>
+  </div>
+
+  <div id="activation-section" hidden>
+    <div class="auth-card">
+      <div class="auth-title">Aktivacija pristupa</div>
+      <div class="auth-desc">Unesi korisničko ime i token koje si dobio/la.</div>
+      <form id="act-form" autocomplete="on">
+        <input type="text" class="auth-input" id="act-username" name="username" placeholder="korisničko ime" autocomplete="username" spellcheck="false">
+        <input type="password" class="auth-input" id="act-token" name="password" placeholder="token (16 karaktera)" autocomplete="current-password" spellcheck="false">
+        <button class="auth-btn" id="act-submit" type="submit">Aktiviraj</button>
+        <div class="auth-error hidden" id="act-error"></div>
+      </form>
+    </div>
+    <div class="contact-card">
+      <div class="contact-title">Nemaš token? Kontaktiraj Stefana</div>
+      <div class="contact-row"><span class="contact-key">Email</span><a class="contact-val" id="ct-email-a" href="#">ssimovic@comtrade.com</a></div>
+      <div class="contact-row"><span class="contact-key">Telefon</span><span class="contact-val">+381 60 320 2273</span></div>
+      <div class="contact-row"><span class="contact-key">LinkedIn</span><a class="contact-val" id="ct-li-a" href="#" target="_blank" rel="noopener">linkedin.com/in/simovicc</a></div>
+    </div>
+  </div>
+
+  <div id="locked-section" hidden>
+    <div class="locked-card">
+      <div class="locked-icon">⚠</div>
+      <div class="locked-title">Pristup zaključan</div>
+      <div class="locked-reason" id="locked-reason"></div>
+    </div>
+    <div class="contact-card">
+      <div class="contact-title">Kontaktiraj Stefana</div>
+      <div class="contact-row"><span class="contact-key">Email</span><a class="contact-val" id="ct-email-b" href="#">ssimovic@comtrade.com</a></div>
+      <div class="contact-row"><span class="contact-key">Telefon</span><span class="contact-val">+381 60 320 2273</span></div>
+      <div class="contact-row"><span class="contact-key">LinkedIn</span><a class="contact-val" id="ct-li-b" href="#" target="_blank" rel="noopener">linkedin.com/in/simovicc</a></div>
+    </div>
+    <div class="locked-actions">
+      <button class="auth-btn auth-btn--ghost" id="locked-check" type="button">Proveri sad</button>
+      <button class="auth-btn auth-btn--ghost" id="locked-deact" type="button">Odjavi se</button>
+    </div>
+  </div>
+
+  <div id="active-section" hidden>
+    <div class="update-banner hidden" id="update-banner"></div>
+
+    <div class="panel">
+      <div class="toggle-zone" id="filter-zone">
+        <div class="toggle-text">
+          <div class="toggle-label">Fokus mode</div>
+          <div class="toggle-state" id="filter-state">-</div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="toggle-zone" id="sound-zone">
+        <div class="toggle-text">
+          <div class="toggle-label">Zvuk za nove alarme</div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+      <div class="panel-body">
+        <div class="controls-row">
+          <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="50">
+          <span class="volume-value" id="volume-value">50%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="toggle-zone" id="notif-zone">
+        <div class="toggle-text">
+          <div class="toggle-label">Push notifikacije</div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+      <div class="perm-warn hidden" id="perm-warn"></div>
+    </div>
+
+    <button class="link-btn" id="dnevnik-btn" type="button">
+      <span class="link-btn-icon">&#128221;</span>
+      <span class="link-btn-text">
+        <span class="link-btn-title">Evidencija prijavljenih alarma</span>
+        <span class="link-btn-sub">Auto-upis + TSV za Registar</span>
+      </span>
+      <span class="link-btn-arrow">&#8599;</span>
+    </button>
+
+    <button class="link-btn" id="registar-btn" type="button">
+      <span class="link-btn-icon">&#128202;</span>
+      <span class="link-btn-text">
+        <span class="link-btn-title">Registar prijavljenih alarma</span>
+        <span class="link-btn-sub">SharePoint Excel</span>
+      </span>
+      <span class="link-btn-arrow">&#8599;</span>
+    </button>
+
+    <button class="link-btn" id="dccpt-link-btn" type="button">
+      <span class="link-btn-icon">&#9776;</span>
+      <span class="link-btn-text">
+        <span class="link-btn-title">Spisak dežurnih DCCPT</span>
+        <span class="link-btn-sub">SharePoint Excel</span>
+      </span>
+      <span class="link-btn-arrow">&#8599;</span>
+    </button>
+
+    <div class="shortcut-hint">
+      <span class="shortcut">Ctrl + Z</span> &nbsp;za brzi toggle
+    </div>
+
+    <div class="auth-footer">
+      Aktivirano kao <span id="auth-user">-</span> · <a id="auth-logout" href="#">Odjavi</a>
+    </div>
+  </div>
+
+  <div class="footer">v5.1.0 · created by Stefan Simović</div>
+
+  <script src="browser-polyfill.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
